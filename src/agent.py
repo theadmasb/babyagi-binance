@@ -9,9 +9,12 @@ def run_once(account):
     for m in snapshot:
         p_est = m["p_est"]
         market_price = m["price"]
+        q = compute_market_implied_probability(m)
         # Note: market_price is not a probability; this placeholder uses the same threshold logic
-        if abs(p_est - market_price) >= MISPRICING_THRESHOLD:
-            bet_fraction = capped_kelly(p_est, market_price, MAX_BET_FRACTION, FRACTIONAL_KELLY)
+        if abs(p_est - q) < MISPRICING_THRESHOLD:
+            continue
+            bet_fraction = capped_kelly(p_est, q, MAX_BET_FRACTION, FRACTIONAL_KELLY)
+
             if bet_fraction <= 0:
                 continue
             bet_size = account["balance"] * bet_fraction

@@ -1,6 +1,21 @@
 import random
+import numpy as np
 from binance_utils import public_get
 from config import BINANCE_TOP_SYMBOLS_LIMIT, BINANCE_HORIZON_MINUTES, BINANCE_MARKET_TYPE
+
+def compute_market_implied_probability(symbol, price, horizon_minutes):
+    # fetch recent minute returns (or use historical sample)
+    # estimate mean and std of log returns, assume normal for short horizon
+    # compute probability price_t+H > price_now
+    mu = 0.0  # estimated drift per minute
+    sigma = 0.001  # placeholder; compute from data
+    H = horizon_minutes
+    # probability price increases = 1 - CDF( (ln(1) - mu*H) / (sigma*sqrt(H)) )
+    from math import log, sqrt
+    z = (0 - mu * H) / (sigma * sqrt(H))
+    from scipy.stats import norm
+    p = 1 - norm.cdf(z)
+    return max(0.001, min(0.999, p))
 
 def list_top_symbols(limit=BINANCE_TOP_SYMBOLS_LIMIT, market_type=BINANCE_MARKET_TYPE):
     futures = (market_type.upper() == "FUTURES")
